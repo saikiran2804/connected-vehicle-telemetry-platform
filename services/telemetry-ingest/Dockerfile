@@ -9,9 +9,12 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 FROM python:3.12-slim AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
+# Patch base-image OS packages to clear CVEs flagged by the Trivy scan gate
+RUN apt-get update && apt-get upgrade -y \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd --create-home appuser
 COPY --from=deps /install /usr/local
 COPY app ./app
-RUN useradd --create-home appuser
 USER appuser
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
