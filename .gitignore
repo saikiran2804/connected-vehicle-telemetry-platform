@@ -18,7 +18,12 @@ env/
 crash.log
 *.tfvars
 !example.tfvars
-.terraform.lock.hcl
+# Note: .terraform.lock.hcl IS committed on purpose (pins provider versions).
+
+# Terraform plan output (local scratch, never commit)
+*.tfplan
+plan.out
+plan_full.txt
 
 # OS / editor
 .DS_Store
