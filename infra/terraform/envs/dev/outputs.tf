@@ -17,3 +17,11 @@ output "ecr_repository_urls" {
   description = "ECR repo URLs to push images to."
   value       = module.ecr.repository_urls
 }
+
+output "eks_cluster_name" {
+  value = module.eks.cluster_name
+}
+
+output "eks_cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}

@@ -21,3 +21,19 @@ module "ecr" {
     "${var.project}/alerts-processor",
   ]
 }
+# EKS cluster + node group. Nodes run in PUBLIC subnets to avoid a paid NAT.
+# NOTE: this is the paid part of the stack (control plane + EC2 node).
+module "eks" {
+  source = "../../modules/eks"
+
+  cluster_name = "${var.project}-${var.environment}" # cvtp-dev
+
+  # Control plane can use all subnets; nodes go in public subnets only.
+  subnet_ids      = concat(module.vpc.public_subnet_ids, module.vpc.private_subnet_ids)
+  node_subnet_ids = module.vpc.public_subnet_ids
+
+  node_instance_type = "t3.small"
+  node_desired_size  = 1
+  node_min_size      = 1
+  node_max_size      = 2
+}

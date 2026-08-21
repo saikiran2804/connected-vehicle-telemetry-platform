@@ -1,0 +1,18 @@
+# Kustomize overlay for EKS: reuses the base manifests but swaps the local
+# image names for your ECR image URLs. Deploy with: kubectl apply -k <this dir>
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../namespace.yaml
+  - ../../telemetry-ingest.yaml
+  - ../../alerts-processor.yaml
+
+# Replace the ':local' images with the ECR-hosted versions.
+images:
+  - name: telemetry-ingest
+    newName: 663526348633.dkr.ecr.ap-south-1.amazonaws.com/cvtp/telemetry-ingest
+    newTag: latest
+  - name: alerts-processor
+    newName: 663526348633.dkr.ecr.ap-south-1.amazonaws.com/cvtp/alerts-processor
+    newTag: latest
