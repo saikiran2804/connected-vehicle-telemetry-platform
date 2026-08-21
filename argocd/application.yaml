@@ -1,0 +1,30 @@
+# =====================================================================
+# Argo CD Application — the GitOps link between your Git repo and cluster.
+# Argo CD watches the k8s/ folder on the main branch and continuously makes
+# the cluster match it. This file itself is applied once to register the app.
+# =====================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cvtp
+  namespace: argocd
+spec:
+  project: default
+
+  # WHERE the truth lives: your GitHub repo, main branch, the k8s/ folder.
+  source:
+    repoURL: https://github.com/saikiran2804/connected-vehicle-telemetry-platform.git
+    targetRevision: main
+    path: k8s
+
+  # WHERE to deploy: this same cluster ("in-cluster"), into the cvtp namespace.
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cvtp
+
+  syncPolicy:
+    automated:
+      prune: true      # delete cluster resources removed from Git
+      selfHeal: true   # if someone edits the cluster by hand, revert to Git
+    syncOptions:
+      - CreateNamespace=true

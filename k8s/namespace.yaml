@@ -1,0 +1,6 @@
+# A Namespace is a folder that groups all our app's objects together,
+# keeping them isolated from other things in the cluster.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cvtp

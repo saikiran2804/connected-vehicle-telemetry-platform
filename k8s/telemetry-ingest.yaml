@@ -1,0 +1,62 @@
+# =====================================================================
+# TELEMETRY-INGEST — Deployment + Service
+# =====================================================================
+
+# --- Deployment: keeps 2 identical pods (replicas) of the app running ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemetry-ingest
+  namespace: cvtp
+  labels:
+    app: telemetry-ingest
+spec:
+  replicas: 2                      # desired state: always 2 pods
+  selector:
+    matchLabels:
+      app: telemetry-ingest        # this Deployment manages pods with this label
+  template:                        # the "blueprint" for each pod
+    metadata:
+      labels:
+        app: telemetry-ingest
+    spec:
+      containers:
+        - name: telemetry-ingest
+          image: telemetry-ingest:local   # local image we'll load into kind
+          imagePullPolicy: IfNotPresent    # use the loaded image, don't pull from a registry
+          ports:
+            - containerPort: 8000
+          # Probes let Kubernetes know if the container is alive/ready.
+          livenessProbe:            # if this fails, K8s restarts the pod
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:           # pod only gets traffic once this passes
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:                # guardrails so one pod can't hog the node
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+---
+# --- Service: a stable internal address that load-balances across the 2 pods ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telemetry-ingest
+  namespace: cvtp
+spec:
+  type: ClusterIP                  # reachable inside the cluster (we'll port-forward to test)
+  selector:
+    app: telemetry-ingest          # routes to pods with this label
+  ports:
+    - port: 80                     # the Service port
+      targetPort: 8000             # the container port it forwards to
