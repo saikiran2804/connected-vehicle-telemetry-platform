@@ -11,7 +11,7 @@ metadata:
   labels:
     app: telemetry-ingest
 spec:
-  replicas: 2                      # desired state: always 2 pods
+  replicas: 3                      # desired state: always 3 pods
   selector:
     matchLabels:
       app: telemetry-ingest        # this Deployment manages pods with this label
